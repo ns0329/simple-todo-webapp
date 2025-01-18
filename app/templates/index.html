@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>ToDo List</h1>
+        
+        <!-- Add Todo Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form action="{{ url_for('main.create_todo') }}" method="post">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Todo</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Todo List -->
+        <div class="list-group">
+            {% for todo in todos %}
+            <div class="list-group-item {% if todo.completed %}list-group-item-success{% endif %}">
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">{{ todo.title }}</h5>
+                        <p class="mb-1">{{ todo.description }}</p>
+                        <small class="text-muted">Created: {{ todo.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                    <div class="btn-group">
+                        <form action="{{ url_for('main.toggle_todo', id=todo.id) }}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm {% if todo.completed %}btn-warning{% else %}btn-success{% endif %}">
+                                {% if todo.completed %}Undo{% else %}Complete{% endif %}
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ todo.id }}">
+                            Edit
+                        </button>
+                        <form action="{{ url_for('main.delete_todo', id=todo.id) }}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Modal -->
+            <div class="modal fade" id="editModal{{ todo.id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Todo</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="{{ url_for('main.edit_todo', id=todo.id) }}" method="post">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="edit-title-{{ todo.id }}" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="edit-title-{{ todo.id }}" name="title" value="{{ todo.title }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-description-{{ todo.id }}" class="form-label">Description</label>
+                                    <textarea class="form-control" id="edit-description-{{ todo.id }}" name="description" rows="3">{{ todo.description }}</textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
